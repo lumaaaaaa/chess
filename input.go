@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 // Returns the row and column index of the selected piece in the board
-func inputStartPiece(team bool) (int, int) {
+func inputStartPiece() (int, int, []string) {
 	for {
 		fmt.Print("start piece > ")
 
@@ -17,8 +17,14 @@ func inputStartPiece(team bool) (int, int) {
 					column := columnToIndex[location[0:1]]
 
 					if board[row][column].Occupied {
-						if board[row][column].Piece.Team == team {
-							return row, column
+						if board[row][column].Piece.Team == currentTeam {
+							validMoves := validMovesAtIndices(row, column)
+
+							if len(validMoves) != 0 {
+								return row, column, validMoves
+							} else {
+								fmt.Printf("\"%s\" does not have any available moves.\n", location)
+							}
 						} else {
 							fmt.Printf("\"%s\" does not belong to the right team.\n", location)
 						}
@@ -37,7 +43,7 @@ func inputStartPiece(team bool) (int, int) {
 	}
 }
 
-func inputDestinationTile(team bool) (int, int) {
+func inputDestinationTile(validMoves []string) (int, int) {
 	for {
 		fmt.Print("destination tile > ")
 
@@ -47,18 +53,22 @@ func inputDestinationTile(team bool) (int, int) {
 		if len(location) == 2 {
 			if arrayContains(validColumns, location[0:1]) {
 				if arrayContains(validRows, location[1:]) {
-					row := rowToIndex[location[1:]]
-					column := columnToIndex[location[0:1]]
-
-					if !board[row][column].Occupied {
-						if board[row][column].Piece.Team == team {
-							return row, column
+					if arrayContains(validMoves, location) {
+						row := rowToIndex[location[1:]]
+						column := columnToIndex[location[0:1]]
+						if board[row][column].Occupied {
+							if board[row][column].Piece.Team != currentTeam {
+								return row, column
+							} else {
+								fmt.Printf("\"%s\" does not belong to the right team.\n", location)
+							}
 						} else {
-							fmt.Printf("\"%s\" does not belong to the right team.\n", location)
+							return row, column
 						}
 					} else {
-						fmt.Printf("\"%s\" is occupied.\n", location)
+						fmt.Printf("\"%s\" is not a valid move.\n", location)
 					}
+
 				} else {
 					fmt.Printf("'%s' is not a valid row.\n", location[1:])
 				}

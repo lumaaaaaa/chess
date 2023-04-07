@@ -12,18 +12,10 @@ var (
 	board       [Size][Size]Tile
 	turn        int
 	currentTeam bool // false for white, true for black
+
+	latestMove Move
 )
 
 func main() {
-	newGame()
-
-	/*board[5][5].Piece = Piece{
-		Team: Black,
-		Type: Queen,
-	}
-
-	board[5][5].Occupied = true*/
-
-	printBoard()
-	handleMove()
+	playGame()
 }

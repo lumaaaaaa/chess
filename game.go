@@ -16,6 +16,14 @@ const (
 	Black = true
 )
 
+type Move struct {
+	Piece             Piece
+	StartRow          int
+	StartColumn       int
+	DestinationRow    int
+	DestinationColumn int
+}
+
 type Tile struct {
 	Occupied bool
 	Piece    Piece
@@ -167,6 +175,19 @@ func newGame() {
 	}
 }
 
+func playGame() {
+	newGame()
+	printBoard()
+	for !gameOver() {
+		handleMove()
+		printBoard()
+	}
+}
+
+func gameOver() bool {
+	return false
+}
+
 func printBoard() {
 	color := whiteBackground
 	for i, row := range board {
@@ -224,15 +245,31 @@ func handleMove() {
 		fmt.Printf("turn %d: black's move.\n", turn)
 	}
 
-	startRow, startColumn := inputStartPiece(currentTeam)
-
-	moves := validMovesAtIndices(startRow, startColumn)
+	startRow, startColumn, moves := inputStartPiece()
 
 	fmt.Println("available moves:", moves)
 
-	destinationRow, destinationColumn := inputDestinationTile(!currentTeam)
+	destinationRow, destinationColumn := inputDestinationTile(moves)
 
-	fmt.Printf("indices: (%d, %d) -> (%d, %d)", startRow, startColumn, destinationRow, destinationColumn)
+	performMove(startRow, startColumn, destinationRow, destinationColumn)
 
+	latestMove.StartRow = startRow
+	latestMove.StartColumn = startColumn
+	latestMove.DestinationRow = destinationRow
+	latestMove.DestinationColumn = destinationColumn
+	latestMove.Piece = board[destinationRow][destinationColumn].Piece
+
+	turn++
 	currentTeam = !currentTeam
+}
+
+func performMove(startRow, startColumn, destinationRow, destinationColumn int) {
+	board[destinationRow][destinationColumn].Occupied = true
+	board[destinationRow][destinationColumn].Piece = board[startRow][startColumn].Piece
+
+	board[startRow][startColumn].Occupied = false
+	board[startRow][startColumn].Piece = Piece{
+		Team: false,
+		Type: 0,
+	}
 }
