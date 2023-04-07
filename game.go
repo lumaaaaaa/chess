@@ -12,8 +12,8 @@ const (
 	Queen  = 4
 	King   = 5
 
-	White = 0
-	Black = 1
+	White = false
+	Black = true
 )
 
 type Tile struct {
@@ -22,13 +22,13 @@ type Tile struct {
 }
 
 type Piece struct {
-	Team int // 0 == white, 1 == black
+	Team bool // false == white, true == black
 	Type int
 }
 
 func newGame() {
 	turn = 1
-	whiteMove = true
+	currentTeam = false
 
 	// black row 1
 	board[0] = [8]Tile{
@@ -217,13 +217,22 @@ func printBoard() {
 	fmt.Println("  a b c d e f g h")
 }
 
-func inputMove() {
-	if whiteMove {
-		fmt.Printf("Turn %d: White's move.\n", turn)
+func handleMove() {
+	if !currentTeam {
+		fmt.Printf("turn %d: white's move.\n", turn)
 	} else {
-		fmt.Printf("Turn %d: Black's move.\n", turn)
+		fmt.Printf("turn %d: black's move.\n", turn)
 	}
 
-	fmt.Print(" > ")
+	startRow, startColumn := inputStartPiece(currentTeam)
 
+	moves := validMovesAtIndices(startRow, startColumn)
+
+	fmt.Println("available moves:", moves)
+
+	destinationRow, destinationColumn := inputDestinationTile(!currentTeam)
+
+	fmt.Printf("indices: (%d, %d) -> (%d, %d)", startRow, startColumn, destinationRow, destinationColumn)
+
+	currentTeam = !currentTeam
 }
