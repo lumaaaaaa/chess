@@ -58,7 +58,3 @@ func arrayContains(array []string, item string) bool {
 
 	return false
 }
-
-func validateMove(move string) {
-
-}

@@ -22,6 +22,9 @@ type Move struct {
 	StartColumn       int
 	DestinationRow    int
 	DestinationColumn int
+	Capture           bool
+	CapturedRow       int
+	CapturedColumn    int
 }
 
 type Tile struct {
@@ -247,28 +250,41 @@ func handleMove() {
 
 	startRow, startColumn, moves := inputStartPiece()
 
-	fmt.Println("available moves:", moves)
+	var formattedMoves []string
+	for _, move := range moves {
+		formattedMoves = append(formattedMoves, indexToColumn[move.DestinationColumn]+indexToRow[move.DestinationRow])
+	}
 
-	destinationRow, destinationColumn := inputDestinationTile(moves)
+	fmt.Println("available moves:", formattedMoves)
 
-	performMove(startRow, startColumn, destinationRow, destinationColumn)
+	move := inputDestinationTile(moves)
+
+	performMove(move)
 
 	latestMove.StartRow = startRow
 	latestMove.StartColumn = startColumn
-	latestMove.DestinationRow = destinationRow
-	latestMove.DestinationColumn = destinationColumn
-	latestMove.Piece = board[destinationRow][destinationColumn].Piece
+	latestMove.DestinationRow = move.DestinationRow
+	latestMove.DestinationColumn = move.DestinationColumn
+	latestMove.Piece = board[move.DestinationRow][move.DestinationColumn].Piece
 
 	turn++
 	currentTeam = !currentTeam
 }
 
-func performMove(startRow, startColumn, destinationRow, destinationColumn int) {
-	board[destinationRow][destinationColumn].Occupied = true
-	board[destinationRow][destinationColumn].Piece = board[startRow][startColumn].Piece
+func performMove(move Move) {
+	if move.Capture {
+		board[move.CapturedRow][move.CapturedColumn].Occupied = false
+		board[move.CapturedRow][move.CapturedColumn].Piece = Piece{
+			Team: false,
+			Type: 0,
+		}
+	}
 
-	board[startRow][startColumn].Occupied = false
-	board[startRow][startColumn].Piece = Piece{
+	board[move.DestinationRow][move.DestinationColumn].Occupied = true
+	board[move.DestinationRow][move.DestinationColumn].Piece = board[move.StartRow][move.StartColumn].Piece
+
+	board[move.StartRow][move.StartColumn].Occupied = false
+	board[move.StartRow][move.StartColumn].Piece = Piece{
 		Team: false,
 		Type: 0,
 	}
